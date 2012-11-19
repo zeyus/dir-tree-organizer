@@ -24,14 +24,22 @@ args.dest = os.path.abspath(args.dest)
 
 files_copied = 0
 files_failed = 0
+files_ignored = 0
 
+
+
+
+if args.showprogress:
+    sys.stdout.write("Getting initial file count...")
+    total_files = fileutils.get_count(start_path=args.source)
+    sys.stdout.write("%d files found to copy"%total_files)
 
 sys.stdout.write("Organizing directory tree from %s to %s\n"%(args.source,args.dest))
-
 
 for root, dirs, files in os.walk(args.source):
     for f in files:
         if args.ignorehidden and f.startswith('.'):
+            files_ignored += 1
             continue
         src = os.path.join(root, f)
         dest = fileutils.getDestPath(src=src, dest=args.dest, format=args.format, nometa=args.nometa)
@@ -49,7 +57,8 @@ for root, dirs, files in os.walk(args.source):
                 shutil.move(src,dest)
             files_copied += 1
             if args.showprogress:
-                sys.stdout.write("Files copied: %d        \r" %files_copied)
+                percentage = int(100 * float(files_copied)/float(total_files))
+                sys.stdout.write("Files copied: %d of %d (%d%%)              \r" %(files_copied,total_files,percentage))
                 sys.stdout.flush()
 
         except (IOError, os.error) as copyerror:
@@ -58,4 +67,4 @@ for root, dirs, files in os.walk(args.source):
                 exit('Error copying file: %s'%copyerror)
 
 
-sys.stdout.write("\nComplete. %d files copied, %d files failed"%(files_copied,files_failed))
+sys.stdout.write("\nComplete. %d files copied, %d files failed, %d files ignored"%(files_copied,files_failed, files_ignored))

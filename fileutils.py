@@ -23,3 +23,17 @@ def getCreatedDate(file):
     mtime = os.path.getmtime(file)
     return min(mtime,ctime)
 
+def get_size(start_path = '.'):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size
+
+def get_count(start_path = '.'):
+    total_count = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            total_count += 1
+    return total_count
