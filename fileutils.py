@@ -19,5 +19,7 @@ def getDestPath(src, dest, format=2, nometa=False):
 
 
 def getCreatedDate(file):
-    return os.path.getctime(file)
+    ctime = os.path.getctime(file)
+    mtime = os.path.getmtime(file)
+    return min(mtime,ctime)
 
