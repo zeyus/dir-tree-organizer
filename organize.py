@@ -13,6 +13,8 @@ parser.add_argument('-s','--skiperror', help='do not exit on copy failure', defa
 parser.add_argument('-p','--showprogress', help='Show progress updates', default=False, action='store_true')
 parser.add_argument('-i','--ignorehidden', help='ignore hidden (.) files', default=False, action='store_true')
 parser.add_argument('-d','--delete', help='delete source', default=False, action='store_true')
+parser.add_argument('-e', '--exclude', help='file extension(s) to exclude including dot (e.g. .jpg)', nargs='*')
+parser.add_argument('-m', '--minsize',help='define minimum filesize in KB (may slow down copy)', type=int)
 
 args = parser.parse_args()
 
@@ -32,21 +34,31 @@ files_ignored = 0
 if args.showprogress:
     sys.stdout.write("Getting initial file count...")
     total_files = fileutils.get_count(start_path=args.source)
-    sys.stdout.write("%d files found to copy"%total_files)
+    sys.stdout.write("%d files found to copy\n"%total_files)
 
 sys.stdout.write("Organizing directory tree from %s to %s\n"%(args.source,args.dest))
 
+if args.minsize:
+    args.minsize*=1024
+
 for root, dirs, files in os.walk(args.source):
     for f in files:
-        if args.ignorehidden and f.startswith('.'):
+        src = os.path.join(root, f)
+        file_name, file_extension = os.path.splitext(os.path.basename(src))
+
+        if args.ignorehidden and f.startswith('.') or (args.exclude and file_extension in args.exclude):
             files_ignored += 1
             continue
-        src = os.path.join(root, f)
+
+        if args.minsize and os.path.getsize(src) < args.minsize:
+            files_ignored += 1
+            continue
+
         dest = fileutils.getDestPath(src=src, dest=args.dest, format=args.format, nometa=args.nometa)
         append = 0
         while os.path.exists(dest):
             append += 1
-            file_name, file_extension = os.path.splitext(os.path.basename(src))
+
             dest = os.path.join(os.path.dirname(dest), file_name + '_' + str(append) + file_extension)
         if not os.path.exists(os.path.dirname(dest)):
             os.makedirs(os.path.dirname(dest))
