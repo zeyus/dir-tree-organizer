@@ -50,6 +50,7 @@ for root, dirs, files in os.walk(args.source):
             files_copied += 1
             if args.showprogress:
                 sys.stdout.write("Files copied: %d        \r" %files_copied)
+                sys.stdout.flush()
 
         except (IOError, os.error) as copyerror:
             files_failed += 1

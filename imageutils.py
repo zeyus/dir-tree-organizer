@@ -1,4 +1,4 @@
-import fileutils,time
+import fileutils,time,sys
 from PIL import Image
 from PIL.ExifTags import TAGS
 IMAGE_EXTENSIONS = ['.jpg','.jpeg', '.tiff']
@@ -29,8 +29,7 @@ def getCreatedDate(file):
                 pass
 
     except Exception, e:
-        print "hi"
-        print e
+        sys.stdout.write('\nError reading image data from file: %s - Defaulting to file creation time\n'%str(file))
         pass
 
 
