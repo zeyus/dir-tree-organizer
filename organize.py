@@ -1,7 +1,17 @@
 #!/usr/bin/python
 import argparse, os, fileutils, imageutils, shutil, sys
 from sys import exit
+import signal
 
+files_copied = 0
+files_failed = 0
+files_ignored = 0
+
+def signal_handler(signal, frame):
+    sys.stdout.write('\nProcess interrupted %d files copied, %d files failed, %d files ignored\n'%(files_copied,files_failed,files_ignored))
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 
 parser = argparse.ArgumentParser(description='Reorganize files into a date folder structure')
@@ -24,9 +34,7 @@ if not os.path.isdir(args.source) or not os.path.isdir(args.dest):
 args.source = os.path.abspath(args.source)
 args.dest = os.path.abspath(args.dest)
 
-files_copied = 0
-files_failed = 0
-files_ignored = 0
+
 
 
 
@@ -79,4 +87,4 @@ for root, dirs, files in os.walk(args.source):
                 exit('Error copying file: %s'%copyerror)
 
 
-sys.stdout.write("\nComplete. %d files copied, %d files failed, %d files ignored"%(files_copied,files_failed, files_ignored))
+sys.stdout.write("\nComplete. %d files copied, %d files failed, %d files ignored\n"%(files_copied,files_failed, files_ignored))
